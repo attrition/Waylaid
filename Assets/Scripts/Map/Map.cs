@@ -9,7 +9,9 @@ public class Map : MonoBehaviour
     public Texture2D playerProvincesTex;
     public Texture2D provinceBorderTex;
 
-    public List<Province> Provinces { get; private set; }
+    public List<WaylaidPlayer>  Players { get; set; }
+    public List<Province>       Provinces { get; private set; }
+
     private Dictionary<Color, Province> colourProvinceMapping;
     private Dictionary<int, Province> numProvinceMapping;
     private Province[] provinceGrid;
@@ -25,6 +27,7 @@ public class Map : MonoBehaviour
 
         province.Owner = player;
         player.Provinces.Add(province);
+        UpdatePlayerProvinceMap();
     }
 
     public Province ProvinceAt(int x, int y)
@@ -74,7 +77,7 @@ public class Map : MonoBehaviour
 
     // Player province map updating
 
-    public void UpdatePlayerProvinceMap(List<WaylaidPlayer> players)
+    public void UpdatePlayerProvinceMap()
     {
         playerProvincesTex = new Texture2D(mapSize, mapSize);
         playerProvincesTex.filterMode = FilterMode.Point;
@@ -89,7 +92,7 @@ public class Map : MonoBehaviour
                 var province = provinceGrid[coord];
                 colourData[coord] = Color.black;
 
-                foreach (var p in players)
+                foreach (var p in Players)
                 {
                     if (p.Provinces.Contains(province))
                         colourData[coord] = p.Colour;

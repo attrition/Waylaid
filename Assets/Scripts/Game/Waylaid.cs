@@ -21,7 +21,7 @@ public class Waylaid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0))
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -34,6 +34,8 @@ public class Waylaid : MonoBehaviour
 
                 var prov = map.ProvinceAt(x, z);
                 selectedProvince = prov;
+                map.SetProvinceOwner(prov, players[(prov.Owner.Number + 1) % 3]); // cycle players
+                map.UpdatePlayerProvinceMap();
             }
         }
     }
@@ -63,12 +65,13 @@ public class Waylaid : MonoBehaviour
         // with player numbers
         players.Add(new AITribe(-1, "Tribe 1"));
 
+        // set maps players reference
+        map.Players = players;
+
         map.SetProvinceOwner(map.Provinces[0], players[0]);
         map.SetProvinceOwner(map.Provinces[1], players[0]);
         map.SetProvinceOwner(map.Provinces[2], players[1]);
         map.SetProvinceOwner(map.Provinces[3], players[2]);
-        
-        map.UpdatePlayerProvinceMap(players);
     }
 
     // Utilities

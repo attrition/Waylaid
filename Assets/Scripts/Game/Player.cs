@@ -16,7 +16,7 @@ public class PlayerColours
 public class WaylaidPlayer
 {
     protected   string  name;
-    protected   int     number;
+    public      int     Number { get; protected set; }
     protected   string  typeDesc;
     public      Color   Colour { get; protected set; }
 
@@ -28,7 +28,7 @@ public class HumanPlayer : WaylaidPlayer
     public HumanPlayer(int number, string name)
     {
         this.name = name;
-        this.number = number;
+        this.Number = number;
         this.typeDesc = "Human";
         this.Colour = PlayerColours.Table[number];
         Provinces = new List<Province>();
@@ -40,7 +40,7 @@ public class AIPlayer : WaylaidPlayer
     public AIPlayer(int number, string name)
     {
         this.name = name;
-        this.number = number;
+        this.Number = number;
         this.typeDesc = "AI";
         this.Colour = PlayerColours.Table[number];
         Provinces = new List<Province>();
@@ -52,7 +52,7 @@ public class AITribe : WaylaidPlayer
     public AITribe(int number, string name)
     {
         this.name = name;
-        this.number = number;
+        this.Number = number;
         this.typeDesc = "Tribe";
         this.Colour = PlayerColours.Table[-1];  // all tribes share the same neutral toned colour
         Provinces = new List<Province>();       // tribes can only hold one province at a time though
