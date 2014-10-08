@@ -164,11 +164,6 @@ public class Map : MonoBehaviour
                 var coord = y * mapSize + x;
                 provinceGrid[coord] = province;
 
-                // if we've already set this pixel via a previous scan,
-                // continue to next one
-                if (borderTexData[coord] == Color.black)
-                    continue;
-
                 //// check neighbours of curr
                 for (int yy = y - 1; yy <= y + 1; yy++)
                 {
