@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class Waylaid : MonoBehaviour
 {
     public Map map;
-    public Province selectedProvince;
+    public int selectedProvince;
 
     public List<WaylaidPlayer> players;
 
@@ -33,9 +33,14 @@ public class Waylaid : MonoBehaviour
                 var z = (int)hit.point.z;
 
                 var prov = map.ProvinceAt(x, z);
-                selectedProvince = prov;
-                map.SetProvinceOwner(prov, players[(prov.Owner.Number + 1) % 3]); // cycle players
-                map.UpdatePlayerProvinceMap();
+                selectedProvince = prov.Number;
+
+                // cycle province ownership via click
+                var nextPlayer = 0;
+                if (prov.Owner != null)
+                    nextPlayer = (prov.Owner.Number + 1) % players.Count;
+                
+                map.SetProvinceOwner(prov, players[nextPlayer]);
             }
         }
     }
@@ -52,7 +57,13 @@ public class Waylaid : MonoBehaviour
     {
         GameObject goMap = new GameObject("Map");
         map = goMap.AddComponent<Map>();
-        map.InitMap(Resources.Load<Texture2D>("Textures/TestProvinces"));
+        map.InitMap(Resources.Load<Texture2D>("Textures/UK"));
+
+        var camPos = Camera.main.transform.position;
+        camPos.x = map.mapSize / 2f;
+        //camPos.z = map.mapSize / 2f;
+        Camera.main.transform.position = camPos;
+        //Camera.main.orthographicSize = map.mapSize / 2f;
     }
 
     void InitPlayers()
@@ -60,6 +71,8 @@ public class Waylaid : MonoBehaviour
         players = new List<WaylaidPlayer>();
         players.Add(new HumanPlayer(0, "Player 1"));
         players.Add(new AIPlayer(1, "AI 1"));
+        players.Add(new AIPlayer(2, "AI 2"));
+        players.Add(new AIPlayer(3, "AI 3"));
 
         // Tribes use negative ints as player nums to not interfere
         // with player numbers
@@ -68,10 +81,12 @@ public class Waylaid : MonoBehaviour
         // set maps players reference
         map.Players = players;
 
-        map.SetProvinceOwner(map.Provinces[0], players[0]);
-        map.SetProvinceOwner(map.Provinces[1], players[0]);
-        map.SetProvinceOwner(map.Provinces[2], players[1]);
-        map.SetProvinceOwner(map.Provinces[3], players[2]);
+        // randomize players
+        foreach (var province in map.Provinces)
+            if (province.Number != 0) // 18 for EuropeLarge
+                map.SetProvinceOwner(province, players[Random.Range(0, players.Count)], false);
+
+        map.UpdatePlayerProvinceMap();
     }
 
     // Utilities

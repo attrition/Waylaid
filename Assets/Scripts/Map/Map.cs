@@ -9,8 +9,8 @@ public class Map : MonoBehaviour
     public Texture2D playerProvincesTex;
     public Texture2D provinceBorderTex;
 
-    public List<WaylaidPlayer>  Players { get; set; }
-    public List<Province>       Provinces { get; private set; }
+    public List<WaylaidPlayer>  Players     { get; set; }
+    public List<Province>       Provinces   { get; private set; }
 
     private Dictionary<Color, Province> colourProvinceMapping;
     private Dictionary<int, Province> numProvinceMapping;
@@ -19,7 +19,7 @@ public class Map : MonoBehaviour
     #region Accessors
 
     // shift owner of province to incoming player
-    public void SetProvinceOwner(Province province, WaylaidPlayer player)
+    public void SetProvinceOwner(Province province, WaylaidPlayer player, bool UpdateMap = true)
     {
         WaylaidPlayer oldPlayer = province.Owner;
         if (oldPlayer != null)
@@ -27,7 +27,9 @@ public class Map : MonoBehaviour
 
         province.Owner = player;
         player.Provinces.Add(province);
-        UpdatePlayerProvinceMap();
+
+        if (UpdateMap)
+            UpdatePlayerProvinceMap();
     }
 
     public Province ProvinceAt(int x, int y)
@@ -92,11 +94,8 @@ public class Map : MonoBehaviour
                 var province = provinceGrid[coord];
                 colourData[coord] = Color.black;
 
-                foreach (var p in Players)
-                {
-                    if (p.Provinces.Contains(province))
-                        colourData[coord] = p.Colour;
-                }
+                if (province.Owner != null)
+                    colourData[coord] = province.Owner.Colour;                
             }
         }
 
@@ -138,7 +137,7 @@ public class Map : MonoBehaviour
                     colourProvinceMapping[curr] = province;
                     numProvinceMapping[provinceNum] = province;
 
-                    Debug.Log("Adding Province [" + curr + "] = " + provinceNum);
+                    //Debug.Log("Adding Province [" + curr + "] = " + provinceNum);
 
                     provinceNum++;
                 }
@@ -160,12 +159,17 @@ public class Map : MonoBehaviour
             for (int x = 0; x < mapSize; x++)
             {
                 Color curr = provinceMapTex.GetPixel(x, y);
-                var province = colourProvinceMapping[curr];
 
+                var province = colourProvinceMapping[curr];
                 var coord = y * mapSize + x;
                 provinceGrid[coord] = province;
 
-                // check neighbours of curr
+                // if we've already set this pixel via a previous scan,
+                // continue to next one
+                if (borderTexData[coord] == Color.black)
+                    continue;
+
+                //// check neighbours of curr
                 for (int yy = y - 1; yy <= y + 1; yy++)
                 {
                     for (int xx = x - 1; xx <= x + 1; xx++)
@@ -183,9 +187,9 @@ public class Map : MonoBehaviour
                             if (!province.Connections.Contains(connection))
                             {
                                 province.Connections.Add(connection);
-                                Debug.Log("Adding Connection between " +
-                                          province.Number + ":" +
-                                          connection.Number);
+                                //Debug.Log("Adding Connection between " +
+                                //          province.Number + ":" +
+                                //          connection.Number);
                             }
                         }
                     }
