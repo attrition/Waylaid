@@ -1,18 +1,74 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class Waylaid : MonoBehaviour
 {
-    // Use this for initialization
+    public Map map;
+    public Province selectedProvince;
+
+    public List<WaylaidPlayer> players;
+
+    void Awake()
+    {
+    }
+
     void Start()
     {
-        MoveTextureTest();
+        InitMap();
+        InitPlayers();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetMouseButton(0))
+        {
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
 
+            if (Physics.Raycast(ray, out hit) && hit.collider == map.gameObject.collider)
+            {
+                //Debug.Log("Mouseover at [" +  + ", " +  + "]");
+                var x = (int)hit.point.x;
+                var z = (int)hit.point.z;
+
+                var prov = map.ProvinceAt(x, z);
+                selectedProvince = prov;
+            }
+        }
+    }
+
+    // 50 fps
+    void FixedUpdate()
+    {
+
+    }
+
+    // Initialization
+
+    void InitMap()
+    {
+        GameObject goMap = new GameObject("Map");
+        map = goMap.AddComponent<Map>();
+        map.InitMap(Resources.Load<Texture2D>("Textures/TestProvinces"));
+    }
+
+    void InitPlayers()
+    {
+        players = new List<WaylaidPlayer>();
+        players.Add(new HumanPlayer(0, "Player 1"));
+        players.Add(new AIPlayer(1, "AI 1"));
+
+        // Tribes use negative ints as player nums to not interfere
+        // with player numbers
+        players.Add(new AITribe(-1, "Tribe 1"));
+
+        map.SetProvinceOwner(map.Provinces[0], players[0]);
+        map.SetProvinceOwner(map.Provinces[1], players[0]);
+        map.SetProvinceOwner(map.Provinces[2], players[1]);
+        map.SetProvinceOwner(map.Provinces[3], players[2]);
+        
+        map.UpdatePlayerProvinceMap(players);
     }
 
     // Utilities
@@ -22,8 +78,6 @@ public class Waylaid : MonoBehaviour
         var rangeTex = CreateRangeTex(11);
         GameObject.Find("TestRadius").renderer.material.mainTexture = rangeTex;
     }
-
-    // Initialization
 
     Texture2D CreateRangeTex(int range)
     {
